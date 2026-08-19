@@ -1,0 +1,253 @@
+model:
+  default: heavy-models
+  provider: custom
+  base_url: ${PROVIDER_BASE_URL}
+  api_key: ${PROVIDER_API_KEY}
+  context_length: 192000
+database:
+  journal_mode: wal
+agent:
+  max_turns: 180
+  verbose: false
+  reasoning_effort: medium
+  personalities: {}
+terminal:
+  backend: local
+  cwd: ${HOME}/Code
+  timeout: 180
+  home_mode: auto
+  container_cpu: 1
+  container_memory: 5120
+  container_disk: 51200
+  container_persistent: true
+  docker_mount_cwd_to_workspace: false
+  lifetime_seconds: 300
+browser:
+  inactivity_timeout: 120
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: true
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 2
+  hard_stop_after:
+    exact_failure: 5
+    same_tool_failure: 8
+    idempotent_no_progress: 5
+compression:
+  enabled: true
+  progress_notices: false
+  threshold: 0.3
+  target_ratio: 0.25
+  protect_last_n: 5
+  min_tail_user_messages: 1
+  max_attempts: 3
+  proactive_prune_tokens: 50000
+  proactive_prune_min_result_chars: 3000
+  proactive_prune_min_reclaim_tokens: 4096
+  protect_first_n: 3
+  codex_gpt55_autoraise: true
+  codex_app_server_auto: native
+  codex_responses_native: false
+  codex_responses_compact_threshold: 200000
+  idle_compact_after_seconds: 0
+prompt_caching:
+  cache_ttl: 5m
+  enabled: true
+  max_cache_size: 1000
+display:
+  compact: false
+  busy_input_mode: interrupt
+  bell_on_complete: false
+  show_reasoning: false
+  streaming: true
+  skin: default
+  interim_assistant_messages: true
+  tool_progress: all
+  cleanup_progress: false
+  long_running_notifications: true
+  busy_ack_detail: true
+  background_process_notifications: all
+stt:
+  enabled: true
+  language: en
+  local:
+    model: base
+  openai:
+    model: whisper-1
+    language: ''
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200
+  user_char_limit: 1375
+  nudge_interval: 10
+  flush_min_turns: 6
+delegation:
+  max_iterations: 6
+skills:
+  creation_nudge_interval: 10
+discord:
+  free_response_channels: '${DISCORD_FREE_RESPONSE_CHANNELS}'
+  auto_thread: false
+code_execution:
+  timeout: 300
+  max_tool_calls: 50
+streaming:
+  enabled: false
+telemetry:
+  shared_metrics:
+    enabled: false
+updates:
+  pre_update_backup: false
+  backup_keep: 5
+  non_interactive_local_changes: stash
+_config_version: 34
+session_reset:
+  mode: none
+  idle_minutes: 1440
+  at_hour: 4
+group_sessions_per_user: true
+platform_toolsets:
+  cli:
+    - hermes-cli
+  telegram:
+    - hermes-telegram
+  discord:
+    - bfl
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - cronjob
+    - discord
+    - discord_admin
+    - file
+    - image_gen
+    - kanban
+    - memory
+    - session_search
+    - skills
+    - terminal
+    - todo
+    - tts
+    - vision
+    - web
+  whatsapp:
+    - hermes-whatsapp
+  slack:
+    - hermes-slack
+  signal:
+    - hermes-signal
+  homeassistant:
+    - hermes-homeassistant
+  qqbot:
+    - hermes-qqbot
+  yuanbao:
+    - hermes-yuanbao
+  teams:
+    - hermes-teams
+  google_chat:
+    - hermes-google_chat
+platforms:
+  discord:
+    enabled: true
+    home_channel:
+      platform: discord
+      chat_id: '${DISCORD_HOME_CHANNEL_ID}'
+      name: 'Denit / #denit'
+      user_id: '${DISCORD_USER_ID}'
+mcp_servers:
+  sonarqube:
+    command: npx
+    args:
+    - -y
+    - sonarqube-mcp-server
+    env:
+      SONARQUBE_URL: ${SONARQUBE_URL}
+      SONARQUBE_TOKEN: ${SONARQUBE_TOKEN}
+    connect_timeout: 60
+    enabled: true
+  playwright:
+    command: npx
+    args:
+    - -y
+    - '@playwright/mcp@latest'
+    connect_timeout: 90
+    enabled: true
+  context7:
+    command: npx
+    args:
+    - -y
+    - '@upstash/context7-mcp@latest'
+    connect_timeout: 60
+    enabled: true
+  jira:
+    command: uvx
+    args:
+    - mcp-atlassian
+    - --enabled-tools
+    - jira_search,jira_get_issue,jira_search_fields,jira_get_user_profile,jira_create_issue,jira_update_issue,jira_get_link_types,jira_create_issue_link,jira_add_comment
+    env:
+      JIRA_URL: ${JIRA_URL}
+      JIRA_USERNAME: ${JIRA_USERNAME}
+      JIRA_API_TOKEN: ${JIRA_API_TOKEN}
+    connect_timeout: 90
+    enabled: true
+  serena:
+    command: /opt/homebrew/bin/uvx
+    args:
+    - --from
+    - git+https://github.com/oraios/serena
+    - serena
+    - start-mcp-server
+    - --context
+    - ide-assistant
+    - --project-from-cwd
+    connect_timeout: 120
+    enabled: true
+
+known_plugin_toolsets:
+  discord:
+    - spotify
+known_builtin_toolsets:
+  discord:
+    - bfl
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - context_engine
+    - cronjob
+    - delegation
+    - discord
+    - discord_admin
+    - file
+    - homeassistant
+    - image_gen
+    - memory
+    - session_search
+    - skills
+    - spotify
+    - stt
+    - terminal
+    - todo
+    - tts
+    - video
+    - video_gen
+    - vision
+    - web
+    - x_search
+    - yuanbao
+approvals:
+  destructive_slash_confirm: false
+  mode: smart
+  timeout: 1800
+  deny:
+    - 'git push --force*'
+    - 'git push -f*'
+    - 'git reset --hard*'
+    - 'git clean -f*'
+    - 'git clean -d*'
+    - 'rm -rf /*'

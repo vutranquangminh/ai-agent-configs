@@ -1,0 +1,532 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "opencode-acp@stable"
+  ],
+  "default_agent": "build",
+  "compaction": {
+    "auto": true,
+    "threshold": 0.3,
+    "strategy": "summarize",
+    "preserveRecentMessages": 5
+  },
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "model": "proxy-provider/heavy-flash-models",
+      "description": "Build orchestrator for implementation, review, debugging, and final decisions.",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "explore-lite": "allow",
+          "explore-flash": "allow",
+          "explore-heavy": "allow"
+        }
+      },
+      "prompt": "You are the primary orchestrator for implementation, review, debugging, planning, design, specs, and final decisions. Default to direct implementation. Fast-path known bug fixes: when the root cause, affected files, acceptance criteria, and minimal fix are already known from the user, handoff, code review, or a failing test, inspect only the relevant code, add or run a focused regression when useful, make the smallest fix, then run focused verification and changed-file checks. Do not invoke brainstorming, writing-plans, executing-plans, subagent exploration, specs, design documents, approval gates, or execution-mode questions for that fast path. A reply such as 'continue', 'yes', or equivalent after a clear proposed fix means execute it. Ask only when a product decision, security boundary, data-loss risk, destructive or irreversible action, or unresolved technical ambiguity remains. Do not narrate loaded skills or internal workflow; report only meaningful checkpoints and blockers. You may call subagents only for a concrete unresolved question requiring scoped read-only or otherwise non-mutating exploration, research, investigation, evidence gathering, or final independent review. Give each subagent a specific scope and question. Do not dispatch a subagent when direct inspection answers the question more cheaply, and do not ask one to inspect the whole project unless that broad scope is necessary. Synthesize findings yourself and make final decisions yourself. Perform implementation yourself. Do not delegate edits, commits, package installs, write MCP actions, third-party mutations, or final project decisions to subagents. Use explore-lite for cheap/simple scoped lookups, explore-flash for medium-complexity scoped investigation, and explore-heavy for difficult, ambiguous, architectural, security, or root-cause investigation."
+    },
+    "plan": {
+      "mode": "primary",
+      "model": "proxy-provider/heavy-models",
+      "description": "Plan orchestrator for planning, design, specs, review, debugging, and final decisions. When the current repo contains an openspec/ directory, follow its spec-driven workflow during planning (see repo AGENTS.md 'OPENSPEC WORKFLOW' section): check `openspec list` for an existing change, create a change only for new features, user-visible behavior changes, multi-app work, or DB migrations; skip specs for scoped bug fixes; after full implementation run `openspec archive <change-name>` and commit the archive.",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "explore-lite": "allow",
+          "explore-flash": "allow",
+          "explore-heavy": "allow"
+        }
+      },
+      "prompt": "You are the primary orchestrator for planning, design, specs, review, debugging, and final decisions. You may call subagents only for scoped read-only or otherwise non-mutating exploration, research, investigation, evidence gathering, and reporting. Give each subagent a specific scope and question. Do not ask a subagent to inspect the whole project unless that broad scope is necessary. Synthesize subagent findings yourself and make final decisions yourself. Do not perform implementation unless explicitly requested. Do not delegate edits, commits, package installs, write MCP actions, third-party mutations, or final project decisions to subagents. Use explore-lite for cheap/simple scoped lookups, explore-flash for medium-complexity scoped investigation, and explore-heavy for difficult, ambiguous, architectural, security, or root-cause investigation."
+    },
+    "explore-lite": {
+      "mode": "subagent",
+      "model": "proxy-provider/light-flash-models",
+      "description": "Cheap/simple scoped lookups and easy read-only investigation. Follow the exact task from build or plan.",
+      "permission": {
+        "*": "deny",
+        "read": {
+          "*": "allow",
+          "*.env": "deny",
+          "*.env.*": "deny",
+          "*.env.example": "allow",
+          "**/secrets/**": "deny"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "edit": "deny",
+        "task": "deny",
+        "todowrite": "deny",
+        "question": "deny",
+        "skill": "deny",
+        "doom_loop": "deny",
+        "external_directory": "ask",
+        "bash": {
+          "*": "deny",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git branch": "allow",
+          "git branch --show-current": "allow",
+          "git branch --list*": "allow",
+          "git branch -a": "allow",
+          "git branch -r": "allow",
+          "git branch -vv": "allow",
+          "git remote": "allow",
+          "git remote -v": "allow",
+          "git remote show*": "allow",
+          "git rev-parse*": "allow",
+          "git ls-files*": "allow",
+          "tsc --noEmit*": "allow",
+          "pnpm exec tsc --noEmit*": "allow",
+          "yarn tsc --noEmit*": "allow"
+        },
+        "filesystem_read_*": "allow",
+        "filesystem_list_*": "allow",
+        "filesystem_search_files": "allow",
+        "filesystem_directory_tree": "allow",
+        "filesystem_get_file_info": "allow",
+        "github_get_*": "allow",
+        "github_list_*": "allow",
+        "github_search_*": "allow",
+        "github_pull_request_read": "allow",
+        "github_issue_read": "allow",
+        "sonarqube_sonarqube_system_status": "allow",
+        "sonarqube_sonarqube_project_measures": "allow",
+        "sonarqube_sonarqube_quality_gate": "allow",
+        "sonarqube_sonarqube_search_issues": "allow",
+        "sonarqube_sonarqube_search_hotspots": "allow",
+        "sonarqube_sonarqube_show_hotspot": "allow",
+        "sonarqube_sonarqube_api_get": "allow",
+        "jira_jira_search": "allow",
+        "docker_docker_container_list": "allow",
+        "docker_docker_container_inspect": "allow",
+        "docker_docker_container_logs": "allow",
+        "docker_docker_system_info": "allow",
+        "docker_docker_system_version": "allow",
+        "playwright_browser_navigate": "allow",
+        "playwright_browser_snapshot": "allow",
+        "playwright_browser_console_messages": "allow",
+        "playwright_browser_network_requests": "allow",
+        "playwright_browser_network_request": "allow",
+        "playwright_browser_wait_for": "allow",
+        "search_duckduckgo_web_search": "allow",
+        "mcp__filesystem__read*": "allow",
+        "mcp__filesystem__list*": "allow",
+        "mcp__filesystem__search_files": "allow",
+        "mcp__filesystem__directory_tree": "allow",
+        "mcp__filesystem__get_file_info": "allow",
+        "mcp__github__get*": "allow",
+        "mcp__github__list*": "allow",
+        "mcp__github__search*": "allow",
+        "mcp__github__pull_request_read": "allow",
+        "mcp__github__issue_read": "allow",
+        "mcp__sonarqube__sonarqube_system_status": "allow",
+        "mcp__sonarqube__sonarqube_project_measures": "allow",
+        "mcp__sonarqube__sonarqube_quality_gate": "allow",
+        "mcp__sonarqube__sonarqube_search_issues": "allow",
+        "mcp__sonarqube__sonarqube_search_hotspots": "allow",
+        "mcp__sonarqube__sonarqube_show_hotspot": "allow",
+        "mcp__sonarqube__sonarqube_api_get": "allow",
+        "mcp__jira__jira_search": "allow",
+        "mcp__docker__docker_container_list": "allow",
+        "mcp__docker__docker_container_inspect": "allow",
+        "mcp__docker__docker_container_logs": "allow",
+        "mcp__docker__docker_system_info": "allow",
+        "mcp__docker__docker_system_version": "allow",
+        "mcp__playwright__browser_navigate": "allow",
+        "mcp__playwright__browser_snapshot": "allow",
+        "mcp__playwright__browser_console_messages": "allow",
+        "mcp__playwright__browser_network_requests": "allow",
+        "mcp__playwright__browser_network_request": "allow",
+        "mcp__playwright__browser_wait_for": "allow",
+        "mcp__search__duckduckgo_web_search": "allow"
+      },
+      "prompt": "You are a scoped exploration subagent. Follow the exact task from build or plan. Do not choose a broader fixed mission. Do not inspect the whole project unless build or plan explicitly asked for that scope. You may use only read-only or otherwise non-mutating actions: read/list/search/grep/glob/LSP tools; read-only MCP tools; read-only GitHub/Jira/SonarQube/etc. operations; browser or Playwright-style inspection that does not submit forms, click destructive buttons, create data, modify data, or trigger external actions; bash only when the command is clearly non-mutating; tests, typechecks, linters, build checks, and dry-run commands only when they do not edit files, update snapshots, write generated files, install packages, change lockfiles, mutate databases, call write APIs, commit/push, or modify third-party services. You must not edit, create, delete, rename, move, or patch files; run formatters that write changes; run codegen that writes files; install packages or update lockfiles; commit, push, merge, open PRs, close issues, assign tickets, or edit Jira/GitHub/SonarQube/etc.; write to databases, queues, caches, cloud resources, local project state, or third-party services; use MCP tools that create/update/delete data; submit forms or click UI actions that mutate remote systems; perform implementation; or make final decisions for the project. If a command or tool may have side effects, do not use it. Report the blocked action and ask build or plan to decide. Output: 1. Answer: direct result for the exact task. 2. Evidence: file paths, symbols, line numbers, command outputs, MCP objects, or URLs when relevant. 3. Caveats: what could not be verified. 4. Suggested next step for build or plan. 5. Confidence: low / medium / high."
+    },
+    "explore-flash": {
+      "mode": "subagent",
+      "model": "proxy-provider/heavy-flash-models",
+      "description": "Medium-complexity scoped read-only investigation. Follow the exact task from build or plan.",
+      "permission": {
+        "*": "deny",
+        "read": {
+          "*": "allow",
+          "*.env": "deny",
+          "*.env.*": "deny",
+          "*.env.example": "allow",
+          "**/secrets/**": "deny"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "edit": "deny",
+        "task": "deny",
+        "todowrite": "deny",
+        "question": "deny",
+        "skill": "deny",
+        "doom_loop": "deny",
+        "external_directory": "ask",
+        "bash": {
+          "*": "deny",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git branch": "allow",
+          "git branch --show-current": "allow",
+          "git branch --list*": "allow",
+          "git branch -a": "allow",
+          "git branch -r": "allow",
+          "git branch -vv": "allow",
+          "git remote": "allow",
+          "git remote -v": "allow",
+          "git remote show*": "allow",
+          "git rev-parse*": "allow",
+          "git ls-files*": "allow",
+          "tsc --noEmit*": "allow",
+          "pnpm exec tsc --noEmit*": "allow",
+          "yarn tsc --noEmit*": "allow"
+        },
+        "filesystem_read_*": "allow",
+        "filesystem_list_*": "allow",
+        "filesystem_search_files": "allow",
+        "filesystem_directory_tree": "allow",
+        "filesystem_get_file_info": "allow",
+        "github_get_*": "allow",
+        "github_list_*": "allow",
+        "github_search_*": "allow",
+        "github_pull_request_read": "allow",
+        "github_issue_read": "allow",
+        "sonarqube_sonarqube_system_status": "allow",
+        "sonarqube_sonarqube_project_measures": "allow",
+        "sonarqube_sonarqube_quality_gate": "allow",
+        "sonarqube_sonarqube_search_issues": "allow",
+        "sonarqube_sonarqube_search_hotspots": "allow",
+        "sonarqube_sonarqube_show_hotspot": "allow",
+        "sonarqube_sonarqube_api_get": "allow",
+        "jira_jira_search": "allow",
+        "docker_docker_container_list": "allow",
+        "docker_docker_container_inspect": "allow",
+        "docker_docker_container_logs": "allow",
+        "docker_docker_system_info": "allow",
+        "docker_docker_system_version": "allow",
+        "playwright_browser_navigate": "allow",
+        "playwright_browser_snapshot": "allow",
+        "playwright_browser_console_messages": "allow",
+        "playwright_browser_network_requests": "allow",
+        "playwright_browser_network_request": "allow",
+        "playwright_browser_wait_for": "allow",
+        "search_duckduckgo_web_search": "allow",
+        "mcp__filesystem__read*": "allow",
+        "mcp__filesystem__list*": "allow",
+        "mcp__filesystem__search_files": "allow",
+        "mcp__filesystem__directory_tree": "allow",
+        "mcp__filesystem__get_file_info": "allow",
+        "mcp__github__get*": "allow",
+        "mcp__github__list*": "allow",
+        "mcp__github__search*": "allow",
+        "mcp__github__pull_request_read": "allow",
+        "mcp__github__issue_read": "allow",
+        "mcp__sonarqube__sonarqube_system_status": "allow",
+        "mcp__sonarqube__sonarqube_project_measures": "allow",
+        "mcp__sonarqube__sonarqube_quality_gate": "allow",
+        "mcp__sonarqube__sonarqube_search_issues": "allow",
+        "mcp__sonarqube__sonarqube_search_hotspots": "allow",
+        "mcp__sonarqube__sonarqube_show_hotspot": "allow",
+        "mcp__sonarqube__sonarqube_api_get": "allow",
+        "mcp__jira__jira_search": "allow",
+        "mcp__docker__docker_container_list": "allow",
+        "mcp__docker__docker_container_inspect": "allow",
+        "mcp__docker__docker_container_logs": "allow",
+        "mcp__docker__docker_system_info": "allow",
+        "mcp__docker__docker_system_version": "allow",
+        "mcp__playwright__browser_navigate": "allow",
+        "mcp__playwright__browser_snapshot": "allow",
+        "mcp__playwright__browser_console_messages": "allow",
+        "mcp__playwright__browser_network_requests": "allow",
+        "mcp__playwright__browser_network_request": "allow",
+        "mcp__playwright__browser_wait_for": "allow",
+        "mcp__search__duckduckgo_web_search": "allow"
+      },
+      "prompt": "You are a scoped exploration subagent. Follow the exact task from build or plan. Do not choose a broader fixed mission. Do not inspect the whole project unless build or plan explicitly asked for that scope. You may use only read-only or otherwise non-mutating actions: read/list/search/grep/glob/LSP tools; read-only MCP tools; read-only GitHub/Jira/SonarQube/etc. operations; browser or Playwright-style inspection that does not submit forms, click destructive buttons, create data, modify data, or trigger external actions; bash only when the command is clearly non-mutating; tests, typechecks, linters, build checks, and dry-run commands only when they do not edit files, update snapshots, write generated files, install packages, change lockfiles, mutate databases, call write APIs, commit/push, or modify third-party services. You must not edit, create, delete, rename, move, or patch files; run formatters that write changes; run codegen that writes files; install packages or update lockfiles; commit, push, merge, open PRs, close issues, assign tickets, or edit Jira/GitHub/SonarQube/etc.; write to databases, queues, caches, cloud resources, local project state, or third-party services; use MCP tools that create/update/delete data; submit forms or click UI actions that mutate remote systems; perform implementation; or make final decisions for the project. If a command or tool may have side effects, do not use it. Report the blocked action and ask build or plan to decide. Output: 1. Answer: direct result for the exact task. 2. Evidence: file paths, symbols, line numbers, command outputs, MCP objects, or URLs when relevant. 3. Caveats: what could not be verified. 4. Suggested next step for build or plan. 5. Confidence: low / medium / high."
+    },
+    "explore-heavy": {
+      "mode": "subagent",
+      "model": "proxy-provider/heavy-models",
+      "description": "Difficult, ambiguous, architectural, security, or root-cause scoped read-only investigation. Follow the exact task from build or plan.",
+      "permission": {
+        "*": "deny",
+        "read": {
+          "*": "allow",
+          "*.env": "deny",
+          "*.env.*": "deny",
+          "*.env.example": "allow",
+          "**/secrets/**": "deny"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "edit": "deny",
+        "task": "deny",
+        "todowrite": "deny",
+        "question": "deny",
+        "skill": "deny",
+        "doom_loop": "deny",
+        "external_directory": "ask",
+        "bash": {
+          "*": "deny",
+          "pwd": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git branch": "allow",
+          "git branch --show-current": "allow",
+          "git branch --list*": "allow",
+          "git branch -a": "allow",
+          "git branch -r": "allow",
+          "git branch -vv": "allow",
+          "git remote": "allow",
+          "git remote -v": "allow",
+          "git remote show*": "allow",
+          "git rev-parse*": "allow",
+          "git ls-files*": "allow",
+          "tsc --noEmit*": "allow",
+          "pnpm exec tsc --noEmit*": "allow",
+          "yarn tsc --noEmit*": "allow"
+        },
+        "filesystem_read_*": "allow",
+        "filesystem_list_*": "allow",
+        "filesystem_search_files": "allow",
+        "filesystem_directory_tree": "allow",
+        "filesystem_get_file_info": "allow",
+        "github_get_*": "allow",
+        "github_list_*": "allow",
+        "github_search_*": "allow",
+        "github_pull_request_read": "allow",
+        "github_issue_read": "allow",
+        "sonarqube_sonarqube_system_status": "allow",
+        "sonarqube_sonarqube_project_measures": "allow",
+        "sonarqube_sonarqube_quality_gate": "allow",
+        "sonarqube_sonarqube_search_issues": "allow",
+        "sonarqube_sonarqube_search_hotspots": "allow",
+        "sonarqube_sonarqube_show_hotspot": "allow",
+        "sonarqube_sonarqube_api_get": "allow",
+        "jira_jira_search": "allow",
+        "docker_docker_container_list": "allow",
+        "docker_docker_container_inspect": "allow",
+        "docker_docker_container_logs": "allow",
+        "docker_docker_system_info": "allow",
+        "docker_docker_system_version": "allow",
+        "playwright_browser_navigate": "allow",
+        "playwright_browser_snapshot": "allow",
+        "playwright_browser_console_messages": "allow",
+        "playwright_browser_network_requests": "allow",
+        "playwright_browser_network_request": "allow",
+        "playwright_browser_wait_for": "allow",
+        "search_duckduckgo_web_search": "allow",
+        "mcp__filesystem__read*": "allow",
+        "mcp__filesystem__list*": "allow",
+        "mcp__filesystem__search_files": "allow",
+        "mcp__filesystem__directory_tree": "allow",
+        "mcp__filesystem__get_file_info": "allow",
+        "mcp__github__get*": "allow",
+        "mcp__github__list*": "allow",
+        "mcp__github__search*": "allow",
+        "mcp__github__pull_request_read": "allow",
+        "mcp__github__issue_read": "allow",
+        "mcp__sonarqube__sonarqube_system_status": "allow",
+        "mcp__sonarqube__sonarqube_project_measures": "allow",
+        "mcp__sonarqube__sonarqube_quality_gate": "allow",
+        "mcp__sonarqube__sonarqube_search_issues": "allow",
+        "mcp__sonarqube__sonarqube_search_hotspots": "allow",
+        "mcp__sonarqube__sonarqube_show_hotspot": "allow",
+        "mcp__sonarqube__sonarqube_api_get": "allow",
+        "mcp__jira__jira_search": "allow",
+        "mcp__docker__docker_container_list": "allow",
+        "mcp__docker__docker_container_inspect": "allow",
+        "mcp__docker__docker_container_logs": "allow",
+        "mcp__docker__docker_system_info": "allow",
+        "mcp__docker__docker_system_version": "allow",
+        "mcp__playwright__browser_navigate": "allow",
+        "mcp__playwright__browser_snapshot": "allow",
+        "mcp__playwright__browser_console_messages": "allow",
+        "mcp__playwright__browser_network_requests": "allow",
+        "mcp__playwright__browser_network_request": "allow",
+        "mcp__playwright__browser_wait_for": "allow",
+        "mcp__search__duckduckgo_web_search": "allow"
+      },
+      "prompt": "You are a scoped exploration subagent. Follow the exact task from build or plan. Do not choose a broader fixed mission. Do not inspect the whole project unless build or plan explicitly asked for that scope. You may use only read-only or otherwise non-mutating actions: read/list/search/grep/glob/LSP tools; read-only MCP tools; read-only GitHub/Jira/SonarQube/etc. operations; browser or Playwright-style inspection that does not submit forms, click destructive buttons, create data, modify data, or trigger external actions; bash only when the command is clearly non-mutating; tests, typechecks, linters, build checks, and dry-run commands only when they do not edit files, update snapshots, write generated files, install packages, change lockfiles, mutate databases, call write APIs, commit/push, or modify third-party services. You must not edit, create, delete, rename, move, or patch files; run formatters that write changes; run codegen that writes files; install packages or update lockfiles; commit, push, merge, open PRs, close issues, assign tickets, or edit Jira/GitHub/SonarQube/etc.; write to databases, queues, caches, cloud resources, local project state, or third-party services; use MCP tools that create/update/delete data; submit forms or click UI actions that mutate remote systems; perform implementation; or make final decisions for the project. If a command or tool may have side effects, do not use it. Report the blocked action and ask build or plan to decide. Output: 1. Answer: direct result for the exact task. 2. Evidence: file paths, symbols, line numbers, command outputs, MCP objects, or URLs when relevant. 3. Caveats: what could not be verified. 4. Suggested next step for build or plan. 5. Confidence: low / medium / high."
+    }
+  },
+  "command": {
+    "explore-lite": {
+      "description": "Ask build to run a cheap scoped read-only lookup.",
+      "agent": "build",
+      "template": "Use explore-lite only if useful. Give it a specific scope and question, then synthesize the result yourself. Do not implement unless separately requested.\n\nScope/question:\n$ARGUMENTS"
+    },
+    "explore-flash": {
+      "description": "Ask build to run a medium scoped read-only investigation.",
+      "agent": "build",
+      "template": "Use explore-flash only if useful. Give it a specific scope and question, then synthesize the result yourself. Do not implement unless separately requested.\n\nScope/question:\n$ARGUMENTS"
+    },
+    "explore-heavy": {
+      "description": "Ask build to run a difficult scoped read-only investigation.",
+      "agent": "build",
+      "template": "Use explore-heavy only if useful. Give it a specific scope and question, then synthesize the result yourself. Do not implement unless separately requested.\n\nScope/question:\n$ARGUMENTS"
+    }
+  },
+  "provider": {
+    "proxy-provider": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Proxy Provider",
+      "options": {
+        "baseURL": "${PROVIDER_BASE_URL}",
+        "apiKey": "${PROVIDER_API_KEY}"
+      },
+      "models": {
+        "heavy-models": {
+          "name": "heavy-models",
+          "attachment": true,
+          "tool_call": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text",
+              "image"
+            ]
+          },
+          "limit": {
+            "context": 192000,
+            "input": 192000,
+            "output": 32000
+          }
+        },
+        "heavy-flash-models": {
+          "name": "heavy-flash-models",
+          "attachment": true,
+          "tool_call": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text",
+              "image"
+            ]
+          },
+          "limit": {
+            "context": 192000,
+            "input": 192000,
+            "output": 32000
+          }
+        },
+        "light-flash-models": {
+          "name": "light-flash-models",
+          "attachment": true,
+          "tool_call": true,
+          "limit": {
+            "context": 192000,
+            "input": 192000,
+            "output": 32000
+          }
+        }
+      }
+    }
+  },
+  "mcp": {
+    "sonarqube": {
+      "type": "local",
+      "command": [
+        "zsh",
+        "-c",
+        "exec ~/.local/bin/sonarqube-mcp-ravid"
+      ],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
+    },
+    "context7": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "enabled": true
+    },
+    "jira": {
+      "type": "local",
+      "command": [
+        "zsh",
+        "-c",
+        "exec uvx mcp-atlassian --enabled-tools jira_search,jira_get_issue,jira_search_fields,jira_get_user_profile,jira_create_issue,jira_update_issue,jira_get_link_types,jira_create_issue_link,jira_add_comment"
+      ],
+      "enabled": true
+    },
+    "serena": {
+      "type": "local",
+      "command": [
+        "/opt/homebrew/bin/uvx",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project-from-cwd"
+      ],
+      "enabled": true
+    }
+  },
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 8192
+  },
+  "tool_cache": {
+    "enabled": true,
+    "ttl": 3600,
+    "max_size": 1000
+  },
+  "skills": {
+    "lazy_load": true,
+    "preload": [
+      "coding-discipline",
+      "verification-before-completion"
+    ]
+  }
+}
