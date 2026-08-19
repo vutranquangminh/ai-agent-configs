@@ -28,6 +28,12 @@ Optimized configuration files for **OpenCode** and **Hermes** AI coding agents w
 - Discord integration (optional)
 - `.env.example` template
 
+### Global Skills (OpenCode)
+- **think-in-code**: Use scripts (Python, Node, shell) to analyze data instead of reading into context. Saves 90-98% tokens on large files.
+- **workflow-templates**: Pre-configured workflows for bug fixes, feature additions, and refactoring to save setup tokens.
+- **coding-conventions**: Repository-agnostic coding standards and best practices.
+- **repo-onboarding**: Auto-bootstraps AI-assisted tooling for new repositories.
+
 ## 🚀 Quick Start
 
 ### 1. Clone this repository

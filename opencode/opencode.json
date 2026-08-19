@@ -86,6 +86,7 @@
           "git remote show*": "allow",
           "git rev-parse*": "allow",
           "git ls-files*": "allow",
+          "rg *": "allow",
           "tsc --noEmit*": "allow",
           "pnpm exec tsc --noEmit*": "allow",
           "yarn tsc --noEmit*": "allow"
@@ -200,6 +201,7 @@
           "git remote show*": "allow",
           "git rev-parse*": "allow",
           "git ls-files*": "allow",
+          "rg *": "allow",
           "tsc --noEmit*": "allow",
           "pnpm exec tsc --noEmit*": "allow",
           "yarn tsc --noEmit*": "allow"
@@ -314,6 +316,7 @@
           "git remote show*": "allow",
           "git rev-parse*": "allow",
           "git ls-files*": "allow",
+          "rg *": "allow",
           "tsc --noEmit*": "allow",
           "pnpm exec tsc --noEmit*": "allow",
           "yarn tsc --noEmit*": "allow"
