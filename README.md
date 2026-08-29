@@ -81,6 +81,31 @@ nano ~/.hermes/.env  # Edit with your values
 hermes config check
 ```
 
+## 💸 Session Hygiene (Biggest Cost Lever)
+
+Long-running sessions are the #1 cost driver. Every new message re-sends the
+entire conversation history, so a 4,000-turn session pays for those 4,000 turns
+on every single reply — cost grows quadratically.
+
+Measured from 745 real sessions:
+
+- Sessions over 200 turns = **92% of all `build` input tokens**.
+- Sessions under 50 turns = under 1%.
+
+**Rule of thumb: one session per ticket/PR.** After finishing a ticket:
+
+- Start fresh with `/new` in the TUI (or `opencode` in a new shell), or
+- `--continue` a specific prior session only when you genuinely need its context.
+
+Use `/compact` mid-session when the current task is done but you want to keep
+going in the same session; it summarizes old turns instead of re-sending them.
+
+Check where your tokens go anytime:
+
+```bash
+opencode stats --days 7
+```
+
 ## 🔐 Environment Variables
 
 ### Required Variables
